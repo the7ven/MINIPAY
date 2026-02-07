@@ -6,7 +6,6 @@ const withPWA = withPWAInit({
   cacheOnFrontEndNav: true,
   aggressiveFrontEndNavCaching: true,
   reloadOnOnline: true,
-  swMinify: true,
   disable: process.env.NODE_ENV === "development", // Désactivé en dev pour éviter les bugs de cache
   register: true,
 });
