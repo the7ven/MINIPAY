@@ -30,6 +30,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         {/* Balises PWA obligatoires */}
         <link rel="manifest" href="/manifest.json" />
+        <link rel="icon" href="/icon-144x144.png" sizes="any" />
         <meta name="theme-color" content="#0F172A" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
