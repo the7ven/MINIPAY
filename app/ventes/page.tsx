@@ -246,18 +246,37 @@ function VentesContent() {
         </div>
       </div>
 
-      <style jsx global>{`
-        @media print {
-          body { visibility: hidden; background: white; }
-          #ticket-thermique { 
-            visibility: visible !important; 
-            display: block !important;
-            position: absolute; left: 0; top: 0; width: 72mm; 
-          }
-          @page { size: 80mm auto; margin: 0; }
-          header, nav, .sidebar, footer { display: none !important; }
-        }
-      `}</style>
+     <style jsx global>{`
+  @media print {
+    /* Cache tout le reste */
+    body { visibility: hidden; background: white; }
+    
+    #ticket-thermique { 
+      visibility: visible !important; 
+      display: block !important;
+      position: absolute; 
+      left: 0; 
+      top: 0; 
+      width: 100%; /* Prend toute la largeur définie par @page */
+      padding: 0;
+      margin: 0;
+      /* On augmente le zoom global pour remplir le papier */
+      zoom: 1.25; 
+    }
+
+    /* Réglage précis du papier */
+    @page { 
+      size: 80mm auto; /* Si ton papier fait 58mm, change 80 par 58 */
+      margin: 0; 
+    }
+
+    /* On s'assure que les textes ne sont pas grisés */
+    * {
+      color: black !important;
+      -webkit-print-color-adjust: exact;
+    }
+  }
+`}</style>
     </div>
   );
 }
