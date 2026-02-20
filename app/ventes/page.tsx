@@ -4,7 +4,8 @@ import React, { useState, useEffect, Suspense, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { Search, ShoppingCart, Plus, Minus, X, Printer, Wifi, WifiOff, Bluetooth } from "lucide-react";
 import { getArticles, updateStockApresVente, saveVente, Article, getSettings } from "@/lib/db";
-import { printReceiptDirect } from "@/lib/thermalPrint";
+// CORRECTION : Importation du bon nom de fonction
+import { printViaBluetooth } from "@/lib/thermalPrint";
 
 function VentesContent() {
   const searchParams = useSearchParams();
@@ -80,7 +81,7 @@ function VentesContent() {
     if (panier.length === 0 || isPrinting) return;
     setIsPrinting(true);
 
-    // On fige les données pour l'impression AVANT de vider le panier
+    // CORRECTION : On fige les données pour l'impression AVANT de vider le panier
     const venteData = { 
       date: new Date().toLocaleDateString(),
       heure: new Date().toLocaleTimeString(),
@@ -95,14 +96,15 @@ function VentesContent() {
       await updateStockApresVente(panier);
       
       try {
-        // Tentative Bluetooth Direct
-        await printReceiptDirect(venteData, shopInfo);
+        // CORRECTION : Appel du bon nom de fonction Bluetooth
+        console.log("Tentative Bluetooth direct...");
+        await printViaBluetooth(panier, shopInfo);
       } catch (btError) {
         // Secours : Impression Système (Windows/RawBT)
-        // Petit délai pour laisser React injecter les données dans le DOM du ticket
+        console.log("Échec Bluetooth, passage à l'impression système.");
         setTimeout(() => {
           window.print();
-        }, 200);
+        }, 250);
       }
       
       // Reset panier seulement après l'appel à l'impression
@@ -113,7 +115,7 @@ function VentesContent() {
       setTimeout(() => setMessage(""), 3000);
     } catch (err) {
       console.error(err);
-      alert("Erreur validation");
+      alert("Erreur lors de la validation");
     } finally {
       setIsPrinting(false);
     }
@@ -135,7 +137,7 @@ function VentesContent() {
             <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${
                 isOnline ? 'bg-green-50 text-green-500' : 'bg-red-50 text-red-500 animate-pulse'
             }`}>
-                {isOnline ? <><Wifi size={12} /> Connecté</> : <><WifiOff size={12} /> Offline</>}
+                {isOnline ? <><Wifi size={12} /> Connecté</> : <><WifiOff size={12} /> Hors-ligne</>}
             </div>
           </div>
           {message && <div className="bg-green-600 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-lg animate-bounce">{message}</div>}
@@ -195,12 +197,12 @@ function VentesContent() {
             disabled={panier.length === 0 || isPrinting} 
             className={`w-full py-5 rounded-2xl font-black uppercase text-[11px] tracking-widest transition-all flex items-center justify-center gap-3 ${panier.length > 0 ? 'bg-mpro-cyan text-mpro-dark hover:scale-105 shadow-xl' : 'bg-white/10 text-white/20'}`}
           >
-            {isPrinting ? "Calcul..." : <><Bluetooth size={18} /> Valider & Imprimer</>}
+            {isPrinting ? "Traitement..." : <><Bluetooth size={18} /> Valider & Imprimer</>}
           </button>
         </div>
       </div>
 
-      {/* TICKET THERMIQUE - OPTIMISÉ POUR 80MM */}
+      {/* TICKET THERMIQUE - CORRECTION : UTILISE derniereVente POUR LE CONTENU */}
       <div id="ticket-thermique" className="hidden print:block bg-white text-black font-mono mx-auto pb-10">
         <div className="text-center border-b-2 border-dashed border-black pb-4 mb-4 uppercase">
           <h2 className="text-2xl font-black">{shopInfo?.shopName || "MINIPAY"}</h2>
@@ -219,7 +221,7 @@ function VentesContent() {
         <table className="w-full text-left mb-6">
           <thead>
             <tr className="border-b-2 border-black text-xs uppercase font-black">
-              <th className="pb-2">DESIGNATION</th>
+              <th className="pb-2">ARTICLE</th>
               <th className="pb-2 text-center">QTÉ</th>
               <th className="pb-2 text-right">TOTAL</th>
             </tr>
@@ -227,9 +229,9 @@ function VentesContent() {
           <tbody className="divide-y divide-dashed divide-black/40">
             {derniereVente?.articles.map((item: any, idx: number) => (
               <tr key={idx}>
-                <td className="py-3 text-[13px] uppercase font-bold leading-tight">{item.nom}</td>
-                <td className="py-3 text-[13px] text-center font-bold">x{item.qte}</td>
-                <td className="py-3 text-[13px] text-right font-black">{(item.prix * item.qte).toLocaleString()}</td>
+                <td className="py-3 text-[14px] uppercase font-bold leading-tight">{item.nom}</td>
+                <td className="py-3 text-[14px] text-center font-bold">x{item.qte}</td>
+                <td className="py-3 text-[14px] text-right font-black">{(item.prix * item.qte).toLocaleString()}</td>
               </tr>
             ))}
           </tbody>
@@ -243,10 +245,11 @@ function VentesContent() {
         <div className="text-center mt-6 pt-4 border-t-2 border-dashed border-black uppercase text-xs font-bold">
           *** MERCI DE VOTRE VISITE ***
           <br />
-          <span className="text-[10px] italic">Propulsé par RestoPay</span>
+          <span className="text-[10px] italic">MINIPAY Pro Terminal</span>
         </div>
       </div>
 
+      {/* CORRECTION : Style d'impression avec Zoom 1.3 */}
       <style jsx global>{`
         @media print {
           body { visibility: hidden; background: white !important; }
@@ -255,7 +258,7 @@ function VentesContent() {
             display: block !important;
             position: absolute; left: 0; top: 0; 
             width: 100% !important;
-            zoom: 1.3; /* Grossit le texte pour remplir le papier 80mm */
+            zoom: 1.3; 
           }
           @page { size: 80mm auto; margin: 0; }
           header, nav, .sidebar, footer { display: none !important; }
@@ -267,7 +270,7 @@ function VentesContent() {
 
 export default function VentesPage() {
   return (
-    <Suspense fallback={<div className="p-20 text-center font-black uppercase text-xs animate-pulse">Initialisation...</div>}>
+    <Suspense fallback={<div className="p-20 text-center font-black uppercase text-xs animate-pulse tracking-tighter">Initialisation de la caisse...</div>}>
       <VentesContent />
     </Suspense>
   );

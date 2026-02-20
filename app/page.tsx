@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Package, DollarSign, ArrowUpRight, AlertTriangle, ShoppingBag, Tag, ShoppingCart, Trophy } from 'lucide-react';
 import { getArticles, getVentes, Article, Vente } from '@/lib/db';
 
+
 export default function Dashboard() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [ventes, setVentes] = useState<Vente[]>([]);
